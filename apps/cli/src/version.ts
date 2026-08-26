@@ -1,2 +1,2 @@
-/** ZHcode CLI version. Keep in sync with package.json until Phase 1 automates it. */
-export const VERSION = "0.1.0";
+/** ZHcode CLI version. Keep in sync with package.json until automated. */
+export const VERSION = "0.2.0";
