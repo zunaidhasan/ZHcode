@@ -51,19 +51,18 @@ zhcode/
 
 ## Roadmap
 
-| Phase | Milestone                     | Focus                                                      |
-| ----- | ----------------------------- | ---------------------------------------------------------- |
-| 0     | `v0.1.0-foundation`           | Repo, Bun monorepo, tooling ← **you are here**             |
-| 1     | `v0.2.0-cli`                  | Interactive CLI with streaming UI                          |
-| 2     | `v0.3.0-model-gateway`        | Model gateway + OpenRouter/mock providers                  |
-| 3     | `v0.4.0-tools`                | Tool system + permission layer                             |
-| 4     | `v0.5.0-first-agent`          | First real coder agent                                     |
-| 5–7   | `v0.6–v0.8`                   | Explorer, Planner, Reviewer/Test loop                      |
-| 8–9   | `v0.9–v0.10`                  | Orchestrator + task graph scheduler                        |
-| 10    | `v0.11.0-isolated-workspaces` | Git worktree isolation                                     |
-| 11–12 | `v0.12–v0.13`                 | Model router + cost management                             |
-| 13–16 | `v0.14–v0.17`                 | Persistent memory, advanced tools, specialized agents, MCP |
-| 17    | `v1.0.0`                      | Polish, install script, public release                     |
+| Phase | Milestone | Focus |
+| ----- | ----------------------------- | ---------------------------------------------------------- || 0 | `v0.1.0-foundation` | Repo, Bun monorepo, tooling |
+| 1 | `v0.2.0-cli` | Interactive CLI with commands ← **you are here** |
+| 2 | `v0.3.0-model-gateway` | Model gateway + OpenRouter/mock providers |
+| 3 | `v0.4.0-tools` | Tool system + permission layer |
+| 4 | `v0.5.0-first-agent` | First real coder agent |
+| 5–7 | `v0.6–v0.8` | Explorer, Planner, Reviewer/Test loop |
+| 8–9 | `v0.9–v0.10` | Orchestrator + task graph scheduler |
+| 10 | `v0.11.0-isolated-workspaces` | Git worktree isolation |
+| 11–12 | `v0.12–v0.13` | Model router + cost management |
+| 13–16 | `v0.14–v0.17` | Persistent memory, advanced tools, specialized agents, MCP |
+| 17 | `v1.0.0` | Polish, install script, public release |
 
 ## Contributing
 
