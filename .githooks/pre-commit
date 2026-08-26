@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+# Keep the repo runnable at every commit.
+set -euo pipefail
+
+# Ensure bun is reachable even when hooks run from GUI clients or fresh shells.
+export PATH="$HOME/.bun/bin:$PATH"
+
+echo "▸ typecheck"
+bun run typecheck
+
+echo "▸ tests"
+bun test
+
+echo "▸ lint"
+bun run lint
+
+echo "✔ pre-commit checks passed"
