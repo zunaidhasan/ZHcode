@@ -10,6 +10,9 @@
     "dev": "bun run src/index.ts"
   },
   "dependencies": {
-    "@zhcode/core": "workspace:*"
+    "@zhcode/core": "workspace:*",
+    "@zhcode/model-gateway": "workspace:*",
+    "@zhcode/tools": "workspace:*",
+    "@zhcode/agent-runtime": "workspace:*"
   }
 }

@@ -35,12 +35,24 @@ describe("ZHcodeApp commands", () => {
 });
 
 describe("ZHcodeApp messages", () => {
-  test("plain messages are stored in the session with a stub reply", () => {
+  test("plain messages are stored in session and signal agent", () => {
     const app = new ZHcodeApp();
     const res = app.handle("create a login page");
 
-    expect(res.action).toBe("continue");
-    expect(app.messageCount).toBe(2); // user + stub assistant reply
+    expect(res.action).toBe("agent");
+    expect(res.lines).toHaveLength(0);
+    expect(res.message).toBe("create a login page");
+    expect(app.messageCount).toBe(1); // only user message added
+  });
+
+  test("buildMessages returns session history", () => {
+    const app = new ZHcodeApp();
+    app.handle("first message");
+    app.addAssistantReply("first reply");
+    app.handle("second message");
+
+    const messages = app.buildMessages();
+    expect(messages).toHaveLength(3); // user + assistant + user
   });
 
   test("unknown commands get guidance instead of crashing", () => {

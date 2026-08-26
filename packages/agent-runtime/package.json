@@ -4,5 +4,9 @@
   "description": "Agent runtime: tool-calling loop, lifecycle, orchestration primitives",
   "type": "module",
   "main": "./src/index.ts",
-  "types": "./src/index.ts"
+  "types": "./src/index.ts",
+  "dependencies": {
+    "@zhcode/model-gateway": "workspace:*",
+    "@zhcode/tools": "workspace:*"
+  }
 }

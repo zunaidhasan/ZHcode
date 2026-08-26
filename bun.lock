@@ -15,17 +15,24 @@
     },
     "apps/cli": {
       "name": "@zhcode/cli",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "bin": {
         "zhcode": "./src/index.ts",
       },
       "dependencies": {
+        "@zhcode/agent-runtime": "workspace:*",
         "@zhcode/core": "workspace:*",
+        "@zhcode/model-gateway": "workspace:*",
+        "@zhcode/tools": "workspace:*",
       },
     },
     "packages/agent-runtime": {
       "name": "@zhcode/agent-runtime",
       "version": "0.1.0",
+      "dependencies": {
+        "@zhcode/model-gateway": "workspace:*",
+        "@zhcode/tools": "workspace:*",
+      },
     },
     "packages/context": {
       "name": "@zhcode/context",
@@ -42,6 +49,9 @@
     "packages/model-gateway": {
       "name": "@zhcode/model-gateway",
       "version": "0.1.0",
+      "dependencies": {
+        "@zhcode/core": "workspace:*",
+      },
     },
     "packages/tools": {
       "name": "@zhcode/tools",

@@ -4,5 +4,8 @@
   "description": "Provider-agnostic model gateway for ZHcode",
   "type": "module",
   "main": "./src/index.ts",
-  "types": "./src/index.ts"
+  "types": "./src/index.ts",
+  "dependencies": {
+    "@zhcode/core": "workspace:*"
+  }
 }

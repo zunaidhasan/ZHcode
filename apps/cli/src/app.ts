@@ -1,15 +1,19 @@
 /**
  * Application layer for the ZHcode CLI.
  *
- * Sits between the terminal UI (repl) and the future agent runtime:
+ * Sits between the terminal UI (repl) and the agent runtime:
  *
  *   CLI (rendering/IO)
  *     ↓
  *   Application Layer   ← this file
  *     ↓
- *   Agent Runtime       (Phase 4+, currently a stub response)
+ *   Agent Runtime       → @zhcode/agent-runtime (Phase 4)
  *     ↓
- *   Model Gateway       (Phase 2)
+ *   Model Gateway       → @zhcode/model-gateway (Phase 2)
+ *     ↓
+ *   Tool Registry       → @zhcode/tools (Phase 3)
+ *     ↓
+ *   Model Provider      (mock, openrouter, etc.)
  *
  * Returns plain data (lines + an action) — it never writes to the terminal,
  * which keeps rendering testable and swappable.
@@ -18,14 +22,23 @@
 import { COMMAND_TABLE, parseInput } from "./commands";
 import { Session } from "./session";
 import { VERSION } from "./version";
+import { ModelGateway } from "@zhcode/model-gateway";
+import type { ModelMessage } from "@zhcode/model-gateway";
+import { Agent } from "@zhcode/agent-runtime";
+import type { AgentEventHandler } from "@zhcode/agent-runtime";
+import { createDefaultRegistry } from "@zhcode/tools";
+import { ToolContext } from "@zhcode/tools";
+import * as process from "node:process";
 
-export type AppAction = "continue" | "clear" | "exit";
+export type AppAction = "continue" | "clear" | "exit" | "agent";
 
 export interface AppResponse {
-  /** Lines to render in the terminal. */
+  /** Lines to render in the terminal (empty when action is "agent"). */
   lines: string[];
   /** What the REPL should do next. */
   action: AppAction;
+  /** The user message to send to the agent (when action is "agent"). */
+  message?: string;
 }
 
 const HELP_LINES: string[] = [
@@ -34,10 +47,73 @@ const HELP_LINES: string[] = [
 ];
 
 export class ZHcodeApp {
-  private readonly session: Session = new Session();
+  readonly session: Session = new Session();
+  readonly gateway: ModelGateway;
+  private readonly agent: Agent;
+  private readonly toolContext: ToolContext;
+  private abortController: AbortController | null = null;
+
+  constructor(_onEvent?: AgentEventHandler) {
+    this.gateway = new ModelGateway();
+    const toolRegistry = createDefaultRegistry();
+    this.toolContext = new ToolContext({
+      projectRoot: process.cwd(),
+      permissions: ["read", "write", "execute", "git"],
+    });
+
+    this.agent = new Agent({
+      gateway: this.gateway,
+      toolRegistry,
+      toolContext: this.toolContext,
+    });
+  }
 
   get messageCount(): number {
     return this.session.messageCount;
+  }
+
+  /** Build the message array for the model from session history. */
+  buildMessages(): ModelMessage[] {
+    return this.session.history.map((m) => ({
+      role: m.role as "user" | "assistant",
+      content: m.content,
+    }));
+  }
+
+  /** Record the assistant's response in the session. */
+  addAssistantReply(content: string): void {
+    this.session.addAssistantMessage(content);
+  }
+
+  /** Cancel the current agent run. */
+  cancel(): void {
+    this.abortController?.abort();
+  }
+
+  /** Run the agent with a user message. */
+  async runAgent(
+    message: string,
+    _onEvent?: AgentEventHandler,
+  ): Promise<{ content: string; status: string }> {
+    this.abortController = new AbortController();
+
+    const response = await this.agent.run(
+      {
+        message,
+        signal: this.abortController.signal,
+      },
+      this.buildMessages(),
+    );
+
+    // Add the assistant's response to the session.
+    if (response.content) {
+      this.addAssistantReply(response.content);
+    }
+
+    return {
+      content: response.content,
+      status: response.status,
+    };
   }
 
   /** Handle one raw line of user input. */
@@ -86,14 +162,7 @@ export class ZHcodeApp {
 
   private handleMessage(text: string): AppResponse {
     this.session.addUserMessage(text);
-
-    // Phase 4 wires the real agent runtime here. For now, acknowledge and
-    // keep the session so context plumbing can be tested end-to-end later.
-    const reply =
-      "Agent runtime is not connected yet (planned for Phase 2–4). " +
-      "Your message was saved to this session.";
-    this.session.addAssistantMessage(reply);
-
-    return { lines: [reply], action: "continue" };
+    // Signal to the REPL that this message should go through the agent.
+    return { lines: [], action: "agent", message: text };
   }
 }

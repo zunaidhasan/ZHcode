@@ -9,6 +9,57 @@ import * as readline from "node:readline";
 import type { Readable, Writable } from "node:stream";
 import { ZHcodeApp } from "./app";
 import { banner, CLEAR_SCREEN, greeting, PROMPT } from "./ui";
+import type { AgentEvent } from "@zhcode/agent-runtime";
+
+/** Render agent events to the terminal. */
+function createEventRenderer(output: Writable): (event: AgentEvent) => void {
+  return (event: AgentEvent) => {
+    switch (event.type) {
+      case "thinking":
+        output.write(`\n⏳ ${event.message ?? "Thinking..."}\n`);
+        break;
+      case "tool_start":
+        output.write(`\n🔍 ${event.toolName}(${formatToolInput(event.input)})\n`);
+        break;
+      case "tool_result":
+        if (event.result.success) {
+          const dataStr = typeof event.result.data === "string"
+            ? truncate(event.result.data, 200)
+            : JSON.stringify(event.result.data, null, 2);
+          output.write(`   ✓ ${truncate(dataStr, 200)}\n`);
+        } else {
+          output.write(`   ✗ ${event.result.message ?? "Failed"}\n`);
+        }
+        break;
+      case "iteration":
+        if (event.current > 1) {
+          output.write(`   (iteration ${event.current}/${event.max})\n`);
+        }
+        break;
+      case "error":
+        output.write(`\n⚠ ${event.message}\n`);
+        break;
+      case "complete":
+        output.write(`\n✅ Done (${event.iterations} iterations, ${event.toolCalls} tool calls)\n`);
+        break;
+      default:
+        break;
+    }
+  };
+}
+
+function formatToolInput(input: Record<string, unknown>): string {
+  const entries = Object.entries(input);
+  if (entries.length === 0) return "";
+  return entries
+    .map(([k, v]) => `${k}=${typeof v === "string" ? truncate(v, 50) : JSON.stringify(v)}`)
+    .join(", ");
+}
+
+function truncate(str: string, maxLen: number): string {
+  if (str.length <= maxLen) return str;
+  return str.slice(0, maxLen - 3) + "...";
+}
 
 export function startRepl(
   input: Readable = process.stdin,
@@ -16,6 +67,7 @@ export function startRepl(
 ): void {
   const app = new ZHcodeApp();
   const rl = readline.createInterface({ input, output, prompt: PROMPT });
+  const renderEvent = createEventRenderer(output);
 
   let sigintStreak = 0;
 
@@ -27,12 +79,31 @@ export function startRepl(
   output.write(`${banner()}\n\n${greeting()}\n\n`);
   rl.prompt();
 
-  rl.on("line", (line: string) => {
+  rl.on("line", async (line: string) => {
     sigintStreak = 0;
 
     const response = app.handle(line);
-    for (const text of response.lines) {
-      output.write(`${text}\n`);
+
+    if (response.action === "agent" && response.message) {
+      // Run the agent with event rendering.
+      try {
+        const result = await app.runAgent(response.message, renderEvent);
+        if (result.content) {
+          output.write(`\n${result.content}\n`);
+        }
+      } catch (err: unknown) {
+        const msg =
+          err && typeof err === "object" && "userMessage" in err
+            ? (err as { userMessage: string }).userMessage
+            : `⚠ Error: ${err instanceof Error ? err.message : "Unknown error"}`;
+        output.write(`\n${msg}\n`);
+      }
+      output.write("\n");
+    } else {
+      // Non-agent response (commands, errors, etc.)
+      for (const text of response.lines) {
+        output.write(`${text}\n`);
+      }
     }
 
     if (response.action === "exit") {
@@ -53,8 +124,9 @@ export function startRepl(
       shutdown();
       return;
     }
-    // First Ctrl+C with a draft in progress: cancel the draft, stay alive.
-    output.write("\n(press Ctrl+C again or type /exit to quit)\n");
+    // First Ctrl+C: cancel the current agent run.
+    app.cancel();
+    output.write("\n⚠ Cancelled. Press Ctrl+C again or type /exit to quit.\n");
     rl.prompt(true);
   });
 
