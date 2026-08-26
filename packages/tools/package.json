@@ -1,0 +1,8 @@
+{
+  "name": "@zhcode/tools",
+  "version": "0.1.0",
+  "description": "Built-in tools and tool registry for ZHcode agents",
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts"
+}

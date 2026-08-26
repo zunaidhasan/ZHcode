@@ -1,0 +1,8 @@
+{
+  "name": "@zhcode/context",
+  "version": "0.1.0",
+  "description": "Context building, codebase exploration and project memory for ZHcode",
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts"
+}

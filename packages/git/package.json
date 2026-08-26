@@ -1,0 +1,8 @@
+{
+  "name": "@zhcode/git",
+  "version": "0.1.0",
+  "description": "Git integration for ZHcode: status, diffs, worktrees",
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts"
+}

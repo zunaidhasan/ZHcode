@@ -1,0 +1,8 @@
+{
+  "name": "@zhcode/core",
+  "version": "0.1.0",
+  "description": "Core types and utilities for ZHcode",
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts"
+}
