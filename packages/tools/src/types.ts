@@ -22,7 +22,10 @@ export interface Tool {
   /** Permission level required to use this tool. */
   permission: PermissionLevel;
   /** Execute the tool with validated input. */
-  execute(input: Record<string, unknown>, context: ToolContext): Promise<ToolResult>;
+  execute(
+    input: Record<string, unknown>,
+    context: ToolContext,
+  ): Promise<ToolResult>;
 }
 
 // ---------------------------------------------------------------------------

@@ -19,10 +19,39 @@ describe("ModelGateway construction", () => {
     delete process.env.OPENROUTER_API_KEY;
   });
 
+  test("registers deepseek when API key is in env", () => {
+    process.env.DEEPSEEK_API_KEY = "test-key";
+    const gw = new ModelGateway();
+    expect(gw.listProviders()).toContain("deepseek");
+    delete process.env.DEEPSEEK_API_KEY;
+  });
+
+  test("honours ZHCODE_PROVIDER env override", () => {
+    process.env.DEEPSEEK_API_KEY = "test-key";
+    process.env.ZHCODE_PROVIDER = "deepseek";
+    const gw = new ModelGateway();
+    expect(gw.activeProvider).toBe("deepseek");
+    delete process.env.DEEPSEEK_API_KEY;
+    delete process.env.ZHCODE_PROVIDER;
+  });
+
+  test("falls back to mock when ZHCODE_PROVIDER is not registered", () => {
+    process.env.ZHCODE_PROVIDER = "nope";
+    const gw = new ModelGateway();
+    expect(gw.activeProvider).toBe("mock");
+    delete process.env.ZHCODE_PROVIDER;
+  });
+
   test("skips openrouter when no API key", () => {
     delete process.env.OPENROUTER_API_KEY;
     const gw = new ModelGateway();
     expect(gw.listProviders()).not.toContain("openrouter");
+  });
+
+  test("skips deepseek when no API key", () => {
+    delete process.env.DEEPSEEK_API_KEY;
+    const gw = new ModelGateway();
+    expect(gw.listProviders()).not.toContain("deepseek");
   });
 });
 

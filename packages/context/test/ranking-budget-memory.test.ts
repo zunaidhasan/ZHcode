@@ -37,7 +37,11 @@ function makeFile(p: string, important = false): FileMetadata {
 describe("RelevanceRanker", () => {
   test("ranks filename matches higher", () => {
     const ranker = new RelevanceRanker();
-    const files = [makeFile("utils.ts"), makeFile("auth.ts"), makeFile("user.ts")];
+    const files = [
+      makeFile("utils.ts"),
+      makeFile("auth.ts"),
+      makeFile("user.ts"),
+    ];
     const results = ranker.rank(files, "auth");
     expect(results[0]!.path).toBe("auth.ts");
   });
@@ -81,7 +85,11 @@ describe("RelevanceRanker", () => {
 
 describe("BudgetManager", () => {
   test("selects files within budget", () => {
-    const budget = new BudgetManager({ maxFiles: 2, maxTokens: 10000, reservedOutputTokens: 0 });
+    const budget = new BudgetManager({
+      maxFiles: 2,
+      maxTokens: 10000,
+      reservedOutputTokens: 0,
+    });
     const files = [makeFile("a.ts"), makeFile("b.ts"), makeFile("c.ts")];
     const contents = new Map([
       ["a.ts", "content a"],
@@ -193,8 +201,14 @@ describe("MemoryStore", () => {
 
 describe("CodebaseExplorer", () => {
   test("finds relevant files", async () => {
-    await fs.writeFile(path.join(tmpDir, "auth.ts"), "export function authenticate() {}");
-    await fs.writeFile(path.join(tmpDir, "user.ts"), "export function getUser() {}");
+    await fs.writeFile(
+      path.join(tmpDir, "auth.ts"),
+      "export function authenticate() {}",
+    );
+    await fs.writeFile(
+      path.join(tmpDir, "user.ts"),
+      "export function getUser() {}",
+    );
 
     const explorer = new CodebaseExplorer({ root: tmpDir });
     await explorer.init();
@@ -222,10 +236,13 @@ describe("CodebaseExplorer", () => {
 describe("ContextEngine", () => {
   test("initializes and detects project", async () => {
     await fs.writeFile(path.join(tmpDir, "tsconfig.json"), "{}");
-    await fs.writeFile(path.join(tmpDir, "package.json"), JSON.stringify({
-      name: "test-project",
-      dependencies: { react: "^18.0.0" },
-    }));
+    await fs.writeFile(
+      path.join(tmpDir, "package.json"),
+      JSON.stringify({
+        name: "test-project",
+        dependencies: { react: "^18.0.0" },
+      }),
+    );
 
     const engine = new ContextEngine({ root: tmpDir });
     await engine.init();
@@ -250,7 +267,10 @@ describe("ContextEngine", () => {
 
   test("builds context for find_code intent", async () => {
     await fs.writeFile(path.join(tmpDir, "tsconfig.json"), "{}");
-    await fs.writeFile(path.join(tmpDir, "auth.ts"), "export function authenticate() {}");
+    await fs.writeFile(
+      path.join(tmpDir, "auth.ts"),
+      "export function authenticate() {}",
+    );
 
     const engine = new ContextEngine({ root: tmpDir });
     await engine.init();

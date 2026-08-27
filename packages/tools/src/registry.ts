@@ -45,7 +45,11 @@ export class ToolRegistry {
   }
 
   /** List all registered tools with their metadata. */
-  listTools(): Array<{ name: string; description: string; permission: string }> {
+  listTools(): Array<{
+    name: string;
+    description: string;
+    permission: string;
+  }> {
     return [...this.tools.values()].map((t) => ({
       name: t.name,
       description: t.description,

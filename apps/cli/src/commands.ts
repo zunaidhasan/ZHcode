@@ -5,7 +5,7 @@
  * Slash commands are parsed here; plain text becomes an agent message.
  */
 
-export type CommandName = "help" | "clear" | "version" | "exit";
+export type CommandName = "help" | "clear" | "version" | "exit" | "init";
 
 export type ParsedInput =
   | { kind: "command"; name: CommandName }
@@ -13,7 +13,13 @@ export type ParsedInput =
   | { kind: "message"; text: string }
   | { kind: "empty" };
 
-const COMMANDS = new Set<CommandName>(["help", "clear", "version", "exit"]);
+const COMMANDS = new Set<CommandName>([
+  "help",
+  "clear",
+  "version",
+  "exit",
+  "init",
+]);
 
 export function isCommandName(value: string): value is CommandName {
   return COMMANDS.has(value as CommandName);
@@ -38,5 +44,6 @@ export const COMMAND_TABLE: ReadonlyArray<[CommandName, string]> = [
   ["help", "Show available commands"],
   ["clear", "Clear conversation"],
   ["version", "Show version"],
+  ["init", "Initialize project metadata"],
   ["exit", "Exit ZHcode"],
 ];

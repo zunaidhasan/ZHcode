@@ -23,7 +23,10 @@ export const gitStatusTool: Tool = {
   },
   permission: "git",
 
-  async execute(_input: Record<string, unknown>, context: ToolContext): Promise<ToolResult> {
+  async execute(
+    _input: Record<string, unknown>,
+    context: ToolContext,
+  ): Promise<ToolResult> {
     try {
       // Get branch name (works even without commits on some git versions).
       let branch = "main";
@@ -36,10 +39,13 @@ export const gitStatusTool: Tool = {
       } catch {
         // If HEAD doesn't exist (no commits yet), try symbolic-ref.
         try {
-          const { stdout } = await execAsync("git symbolic-ref --short HEAD 2>/dev/null || echo unknown", {
-            cwd: context.projectRoot,
-            timeout: 5_000,
-          });
+          const { stdout } = await execAsync(
+            "git symbolic-ref --short HEAD 2>/dev/null || echo unknown",
+            {
+              cwd: context.projectRoot,
+              timeout: 5_000,
+            },
+          );
           branch = stdout.trim();
           if (branch === "unknown") branch = "main";
         } catch {
@@ -78,7 +84,10 @@ export const gitStatusTool: Tool = {
         success: true,
         data: {
           branch,
-          clean: modified.length === 0 && untracked.length === 0 && staged.length === 0,
+          clean:
+            modified.length === 0 &&
+            untracked.length === 0 &&
+            staged.length === 0,
           modified,
           untracked,
           staged,

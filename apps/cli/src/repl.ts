@@ -13,19 +13,36 @@ import type { AgentEvent } from "@zhcode/agent-runtime";
 
 /** Render agent events to the terminal. */
 function createEventRenderer(output: Writable): (event: AgentEvent) => void {
+  let streaming = false;
+
   return (event: AgentEvent) => {
     switch (event.type) {
       case "thinking":
         output.write(`\n⏳ ${event.message ?? "Thinking..."}\n`);
         break;
+      case "model_delta":
+        // Streamed tokens — print inline for a responsive feel.
+        if (!streaming) {
+          output.write("\n");
+          streaming = true;
+        }
+        output.write(event.delta);
+        break;
       case "tool_start":
-        output.write(`\n🔍 ${event.toolName}(${formatToolInput(event.input)})\n`);
+        if (streaming) {
+          output.write("\n");
+          streaming = false;
+        }
+        output.write(
+          `\n🔍 ${event.toolName}(${formatToolInput(event.input)})\n`,
+        );
         break;
       case "tool_result":
         if (event.result.success) {
-          const dataStr = typeof event.result.data === "string"
-            ? truncate(event.result.data, 200)
-            : JSON.stringify(event.result.data, null, 2);
+          const dataStr =
+            typeof event.result.data === "string"
+              ? truncate(event.result.data, 200)
+              : JSON.stringify(event.result.data, null, 2);
           output.write(`   ✓ ${truncate(dataStr, 200)}\n`);
         } else {
           output.write(`   ✗ ${event.result.message ?? "Failed"}\n`);
@@ -37,10 +54,20 @@ function createEventRenderer(output: Writable): (event: AgentEvent) => void {
         }
         break;
       case "error":
+        if (streaming) {
+          output.write("\n");
+          streaming = false;
+        }
         output.write(`\n⚠ ${event.message}\n`);
         break;
       case "complete":
-        output.write(`\n✅ Done (${event.iterations} iterations, ${event.toolCalls} tool calls)\n`);
+        if (streaming) {
+          output.write("\n");
+          streaming = false;
+        }
+        output.write(
+          `\n✅ Done (${event.iterations} iterations, ${event.toolCalls} tool calls)\n`,
+        );
         break;
       default:
         break;
@@ -52,7 +79,10 @@ function formatToolInput(input: Record<string, unknown>): string {
   const entries = Object.entries(input);
   if (entries.length === 0) return "";
   return entries
-    .map(([k, v]) => `${k}=${typeof v === "string" ? truncate(v, 50) : JSON.stringify(v)}`)
+    .map(
+      ([k, v]) =>
+        `${k}=${typeof v === "string" ? truncate(v, 50) : JSON.stringify(v)}`,
+    )
     .join(", ");
 }
 
@@ -88,7 +118,8 @@ export function startRepl(
       // Run the agent with event rendering.
       try {
         const result = await app.runAgent(response.message, renderEvent);
-        if (result.content) {
+        // With streaming, tokens were already printed via model_delta events.
+        if (result.content && !result.streamed) {
           output.write(`\n${result.content}\n`);
         }
       } catch (err: unknown) {
@@ -97,6 +128,19 @@ export function startRepl(
             ? (err as { userMessage: string }).userMessage
             : `⚠ Error: ${err instanceof Error ? err.message : "Unknown error"}`;
         output.write(`\n${msg}\n`);
+      }
+      output.write("\n");
+    } else if (response.action === "init") {
+      // Initialize project metadata.
+      try {
+        const { lines } = await app.initProject();
+        for (const text of lines) {
+          output.write(`${text}\n`);
+        }
+      } catch (err: unknown) {
+        output.write(
+          `⚠ Init failed: ${err instanceof Error ? err.message : String(err)}\n`,
+        );
       }
       output.write("\n");
     } else {

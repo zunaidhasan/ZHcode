@@ -36,19 +36,30 @@ export class StructureBuilder {
   /** Build the project structure. */
   async build(): Promise<ProjectStructure> {
     const topLevel = await this.readDir(this.root);
-    const directories = topLevel.filter((e) => e.isDirectory).map((e) => e.name);
+    const directories = topLevel
+      .filter((e) => e.isDirectory)
+      .map((e) => e.name);
     const files = topLevel.filter((e) => !e.isDirectory).map((e) => e.name);
 
     // Read key directories (src/, lib/, app/, etc.)
     const keyDirectories: Record<string, string[]> = {};
-    const keyDirNames = ["src", "lib", "app", "pages", "components", "services", "utils", "hooks"];
+    const keyDirNames = [
+      "src",
+      "lib",
+      "app",
+      "pages",
+      "components",
+      "services",
+      "utils",
+      "hooks",
+    ];
 
     for (const dirName of keyDirNames) {
       if (directories.includes(dirName)) {
         const entries = await this.readDir(path.join(this.root, dirName));
         keyDirectories[dirName] = entries
           .slice(0, MAX_ENTRIES_PER_DIR)
-          .map((e) => e.isDirectory ? `${e.name}/` : e.name);
+          .map((e) => (e.isDirectory ? `${e.name}/` : e.name));
       }
     }
 
@@ -81,7 +92,9 @@ export class StructureBuilder {
   // Private
   // -------------------------------------------------------------------------
 
-  private async readDir(dirPath: string): Promise<Array<{ name: string; isDirectory: boolean }>> {
+  private async readDir(
+    dirPath: string,
+  ): Promise<Array<{ name: string; isDirectory: boolean }>> {
     try {
       const entries = await fs.readdir(dirPath, { withFileTypes: true });
       return entries

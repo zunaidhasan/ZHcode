@@ -109,8 +109,6 @@ describe("ModelUsage type shape", () => {
       completionTokens: 50,
       totalTokens: 150,
     };
-    expect(usage.promptTokens + usage.completionTokens).toBe(
-      usage.totalTokens,
-    );
+    expect(usage.promptTokens + usage.completionTokens).toBe(usage.totalTokens);
   });
 });

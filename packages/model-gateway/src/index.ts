@@ -32,7 +32,5 @@ export { ModelGateway, type GatewayConfig } from "./gateway";
 
 // Providers
 export { MockProvider, type MockProviderOptions } from "./mock";
-export {
-  OpenRouterProvider,
-  type OpenRouterConfig,
-} from "./openrouter";
+export { OpenRouterProvider, type OpenRouterConfig } from "./openrouter";
+export { DeepSeekProvider, type DeepSeekConfig } from "./deepseek";

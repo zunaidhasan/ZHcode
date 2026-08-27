@@ -1,37 +1,9 @@
 /**
  * ModelProvider — the interface every LLM adapter must implement.
  *
- * The gateway orchestrates providers through this contract, so adding
- * a new backend (Gemini, Kimi, NVIDIA, etc.) is just a new file that
- * implements ModelProvider.
+ * The canonical interface lives in `@zhcode/core`. This module re-exports it
+ * so that existing `import { type ModelProvider } from "@zhcode/model-gateway"`
+ * calls keep working.
  */
 
-import type {
-  ModelRequest,
-  ModelResponse,
-  ModelStreamChunk,
-  ProviderInfo,
-} from "./types";
-
-export interface ModelProvider {
-  /** Human-readable provider name (e.g. "openrouter", "mock"). */
-  readonly name: string;
-
-  /** What this provider supports. */
-  info(): ProviderInfo;
-
-  /**
-   * Generate a complete (non-streaming) response.
-   * Throw a ModelGatewayError subclass on failure.
-   */
-  generate(request: ModelRequest): Promise<ModelResponse>;
-
-  /**
-   * Generate a streaming response.
-   * Yields ModelStreamChunk values; the last chunk has `done: true`.
-   * Throw a ModelGatewayError subclass on failure.
-   */
-  stream(
-    request: ModelRequest,
-  ): AsyncIterable<ModelStreamChunk>;
-}
+export type { ModelProvider } from "@zhcode/core";

@@ -29,7 +29,8 @@ export const readFileTool: Tool = {
       },
       offset: {
         type: "number",
-        description: "Line number to start reading from (1-indexed). Default: 1.",
+        description:
+          "Line number to start reading from (1-indexed). Default: 1.",
       },
       limit: {
         type: "number",
@@ -40,7 +41,10 @@ export const readFileTool: Tool = {
   },
   permission: "read",
 
-  async execute(input: Record<string, unknown>, context: ToolContext): Promise<ToolResult> {
+  async execute(
+    input: Record<string, unknown>,
+    context: ToolContext,
+  ): Promise<ToolResult> {
     const relPath = input.path as string;
     if (!relPath) {
       return { success: false, data: null, message: "path is required" };
@@ -61,11 +65,19 @@ export const readFileTool: Tool = {
     try {
       stat = await fs.stat(absPath);
     } catch {
-      return { success: false, data: null, message: `File not found: ${relPath}` };
+      return {
+        success: false,
+        data: null,
+        message: `File not found: ${relPath}`,
+      };
     }
 
     if (stat.isDirectory()) {
-      return { success: false, data: null, message: `Path is a directory, not a file: ${relPath}` };
+      return {
+        success: false,
+        data: null,
+        message: `Path is a directory, not a file: ${relPath}`,
+      };
     }
 
     // Size check.
@@ -83,7 +95,11 @@ export const readFileTool: Tool = {
       const buf = Buffer.alloc(BINARY_CHECK_BYTES);
       const { bytesRead } = await fd.read(buf, 0, BINARY_CHECK_BYTES, 0);
       if (buf.subarray(0, bytesRead).includes(0)) {
-        return { success: false, data: null, message: `Binary file rejected: ${relPath}` };
+        return {
+          success: false,
+          data: null,
+          message: `Binary file rejected: ${relPath}`,
+        };
       }
     } finally {
       await fd.close();

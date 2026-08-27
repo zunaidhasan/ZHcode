@@ -31,12 +31,21 @@ function ctx(cwd?: string): ToolContext {
 
 describe("search_files", () => {
   test("finds matches across files", async () => {
-    await fs.writeFile(path.join(tmpDir, "a.ts"), "const x = Supabase.create();");
-    await fs.writeFile(path.join(tmpDir, "b.ts"), "import { Supabase } from 'lib';");
+    await fs.writeFile(
+      path.join(tmpDir, "a.ts"),
+      "const x = Supabase.create();",
+    );
+    await fs.writeFile(
+      path.join(tmpDir, "b.ts"),
+      "import { Supabase } from 'lib';",
+    );
 
     const result = await searchFilesTool.execute({ query: "Supabase" }, ctx());
     expect(result.success).toBe(true);
-    const data = result.data as { matches: Array<{ file: string; line: number }>; totalMatches: number };
+    const data = result.data as {
+      matches: Array<{ file: string; line: number }>;
+      totalMatches: number;
+    };
     expect(data.totalMatches).toBe(2);
     expect(data.matches.some((m) => m.file === "a.ts")).toBe(true);
     expect(data.matches.some((m) => m.file === "b.ts")).toBe(true);
@@ -45,7 +54,10 @@ describe("search_files", () => {
   test("returns empty for no matches", async () => {
     await fs.writeFile(path.join(tmpDir, "a.ts"), "hello world");
 
-    const result = await searchFilesTool.execute({ query: "NONEXISTENT" }, ctx());
+    const result = await searchFilesTool.execute(
+      { query: "NONEXISTENT" },
+      ctx(),
+    );
     expect(result.success).toBe(true);
     const data = result.data as { totalMatches: number };
     expect(data.totalMatches).toBe(0);
@@ -87,7 +99,9 @@ describe("search_files", () => {
     const result = await searchFilesTool.execute({ query: "Supabase" }, ctx());
     const data = result.data as { matches: Array<{ file: string }> };
     // node_modules should be skipped in search results
-    const nodeModulesMatches = data.matches.filter((m) => m.file.includes("node_modules"));
+    const nodeModulesMatches = data.matches.filter((m) =>
+      m.file.includes("node_modules"),
+    );
     expect(nodeModulesMatches.length).toBe(0);
   });
 });
@@ -98,17 +112,17 @@ describe("search_files", () => {
 
 describe("run_command", () => {
   test("executes a safe command", async () => {
-    const result = await runCommandTool.execute({ command: "echo hello" }, ctx());
+    const result = await runCommandTool.execute(
+      { command: "echo hello" },
+      ctx(),
+    );
     expect(result.success).toBe(true);
     const data = result.data as { stdout: string };
     expect(data.stdout).toContain("hello");
   });
 
   test("blocks dangerous commands", async () => {
-    const result = await runCommandTool.execute(
-      { command: "rm -rf /" },
-      ctx(),
-    );
+    const result = await runCommandTool.execute({ command: "rm -rf /" }, ctx());
     expect(result.success).toBe(false);
     expect(result.message).toContain("blocked");
   });
@@ -161,10 +175,7 @@ describe("git_status", () => {
     );
     // Make an initial commit so HEAD exists.
     await runCommandTool.execute({ command: "git add ." }, ctx());
-    await runCommandTool.execute(
-      { command: "git commit -m 'initial'" },
-      ctx(),
-    );
+    await runCommandTool.execute({ command: "git commit -m 'initial'" }, ctx());
 
     const result = await gitStatusTool.execute({}, ctx());
     expect(result.success).toBe(true);
@@ -185,10 +196,7 @@ describe("git_status", () => {
       ctx(),
     );
     await runCommandTool.execute({ command: "git add readme.md" }, ctx());
-    await runCommandTool.execute(
-      { command: "git commit -m 'initial'" },
-      ctx(),
-    );
+    await runCommandTool.execute({ command: "git commit -m 'initial'" }, ctx());
     // Now add an untracked file.
     await fs.writeFile(path.join(tmpDir, "new.ts"), "hello");
 

@@ -17,9 +17,9 @@ const DEFAULT_TIMEOUT_MS = 30_000;
 
 /** Patterns that are always blocked. */
 const BLOCKED_PATTERNS = [
-  /\brm\s+-rf\s+\//,       // rm -rf /
-  /\brm\s+-rf\s+~\//,     // rm -rf ~/
-  /\bmv\s+.*\s+\/\s*$/,   // mv to /
+  /\brm\s+-rf\s+\//, // rm -rf /
+  /\brm\s+-rf\s+~\//, // rm -rf ~/
+  /\bmv\s+.*\s+\/\s*$/, // mv to /
   /\bchmod\s+777\b/,
   /\bsudo\b/,
   /\bcurl\b.*\|\s*bash/,
@@ -29,8 +29,8 @@ const BLOCKED_PATTERNS = [
   /\bgit\s+clean\b/,
   /\bnpm\s+publish\b/,
   /\bbun\s+publish\b/,
-  /\bdel\s+\/[sf]/i,      // Windows del /s /f
-  /\brmdir\s+\/s\b/i,     // Windows rmdir /s
+  /\bdel\s+\/[sf]/i, // Windows del /s /f
+  /\brmdir\s+\/s\b/i, // Windows rmdir /s
   /\bformat\s+[a-zA-Z]:/i, // Windows format
 ];
 
@@ -59,7 +59,10 @@ export const runCommandTool: Tool = {
   },
   permission: "execute",
 
-  async execute(input: Record<string, unknown>, context: ToolContext): Promise<ToolResult> {
+  async execute(
+    input: Record<string, unknown>,
+    context: ToolContext,
+  ): Promise<ToolResult> {
     const command = input.command as string;
     if (!command) {
       return { success: false, data: null, message: "command is required" };

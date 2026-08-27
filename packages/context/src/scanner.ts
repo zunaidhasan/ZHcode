@@ -31,12 +31,13 @@ export class ProjectScanner {
 
   /** Scan the project and return context. */
   async scan(): Promise<ProjectContext> {
-    const [language, frameworks, packageManager, packageInfo] = await Promise.all([
-      this.detectLanguage(),
-      this.detectFrameworks(),
-      this.detectPackageManager(),
-      this.readPackageJson(),
-    ]);
+    const [language, frameworks, packageManager, packageInfo] =
+      await Promise.all([
+        this.detectLanguage(),
+        this.detectFrameworks(),
+        this.detectPackageManager(),
+        this.readPackageJson(),
+      ]);
 
     const workspaces = await this.detectWorkspaces(packageInfo);
 
@@ -77,8 +78,10 @@ export class ProjectScanner {
     }
 
     // Check for common JS/TS files.
-    if (await this.exists("index.js") || await this.exists("index.mjs")) return "javascript";
-    if (await this.exists("index.ts") || await this.exists("index.mts")) return "typescript";
+    if ((await this.exists("index.js")) || (await this.exists("index.mjs")))
+      return "javascript";
+    if ((await this.exists("index.ts")) || (await this.exists("index.mts")))
+      return "typescript";
 
     return "unknown";
   }
@@ -117,8 +120,9 @@ export class ProjectScanner {
     // Python frameworks
     if (await this.exists("manage.py")) {
       // Could be Django
-      const settingsExists = await this.pathExists("settings.py") ||
-        await this.globExists("*/settings.py");
+      const settingsExists =
+        (await this.pathExists("settings.py")) ||
+        (await this.globExists("*/settings.py"));
       if (settingsExists) frameworks.push("django");
     }
 
@@ -136,7 +140,8 @@ export class ProjectScanner {
   // -------------------------------------------------------------------------
 
   private async detectPackageManager(): Promise<PackageManager> {
-    if (await this.exists("bun.lockb") || await this.exists("bun.lock")) return "bun";
+    if ((await this.exists("bun.lockb")) || (await this.exists("bun.lock")))
+      return "bun";
     if (await this.exists("pnpm-lock.yaml")) return "pnpm";
     if (await this.exists("yarn.lock")) return "yarn";
     if (await this.exists("package-lock.json")) return "npm";
@@ -144,7 +149,11 @@ export class ProjectScanner {
     if (await this.exists("Cargo.lock")) return "cargo";
 
     // Python
-    if (await this.exists("requirements.txt") || await this.exists("pyproject.toml")) return "pip";
+    if (
+      (await this.exists("requirements.txt")) ||
+      (await this.exists("pyproject.toml"))
+    )
+      return "pip";
 
     return "unknown";
   }
@@ -169,7 +178,10 @@ export class ProjectScanner {
 
   private async readPackageJson(): Promise<PackageJson | null> {
     try {
-      const content = await fs.readFile(path.join(this.root, "package.json"), "utf-8");
+      const content = await fs.readFile(
+        path.join(this.root, "package.json"),
+        "utf-8",
+      );
       return JSON.parse(content) as PackageJson;
     } catch {
       return null;

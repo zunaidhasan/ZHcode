@@ -102,7 +102,9 @@ describe("read_file", () => {
   });
 
   test("supports offset and limit", async () => {
-    const content = Array.from({ length: 100 }, (_, i) => `line ${i + 1}`).join("\n");
+    const content = Array.from({ length: 100 }, (_, i) => `line ${i + 1}`).join(
+      "\n",
+    );
     await fs.writeFile(path.join(tmpDir, "big.ts"), content);
 
     const result = await readFileTool.execute(
@@ -110,7 +112,12 @@ describe("read_file", () => {
       ctx(),
     );
     expect(result.success).toBe(true);
-    const data = result.data as { content: string; totalLines: number; offset: number; linesRead: number };
+    const data = result.data as {
+      content: string;
+      totalLines: number;
+      offset: number;
+      linesRead: number;
+    };
     expect(data.offset).toBe(10);
     expect(data.linesRead).toBe(5);
     expect(data.totalLines).toBe(100);
@@ -140,7 +147,10 @@ describe("write_file", () => {
     );
     expect(result.success).toBe(true);
 
-    const content = await fs.readFile(path.join(tmpDir, "src/utils/helper.ts"), "utf-8");
+    const content = await fs.readFile(
+      path.join(tmpDir, "src/utils/helper.ts"),
+      "utf-8",
+    );
     expect(content).toBe("export {};");
   });
 
@@ -152,7 +162,10 @@ describe("write_file", () => {
     );
     expect(result.success).toBe(true);
 
-    const content = await fs.readFile(path.join(tmpDir, "existing.ts"), "utf-8");
+    const content = await fs.readFile(
+      path.join(tmpDir, "existing.ts"),
+      "utf-8",
+    );
     expect(content).toBe("new");
   });
 });
@@ -163,7 +176,10 @@ describe("write_file", () => {
 
 describe("edit_file", () => {
   test("replaces exact text", async () => {
-    await fs.writeFile(path.join(tmpDir, "edit.ts"), "function foo() {\n  return 1;\n}");
+    await fs.writeFile(
+      path.join(tmpDir, "edit.ts"),
+      "function foo() {\n  return 1;\n}",
+    );
 
     const result = await editFileTool.execute(
       { path: "edit.ts", oldText: "return 1;", newText: "return 42;" },

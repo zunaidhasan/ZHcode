@@ -15,6 +15,8 @@ import type {
 import { MockProvider } from "./mock";
 import { OpenRouterProvider } from "./openrouter";
 import type { OpenRouterConfig } from "./openrouter";
+import { DeepSeekProvider } from "./deepseek";
+import type { DeepSeekConfig } from "./deepseek";
 import { ModelGatewayError } from "./errors";
 
 // ---------------------------------------------------------------------------
@@ -26,6 +28,8 @@ export interface GatewayConfig {
   defaultProvider?: string;
   /** OpenRouter config — only needed if using the openrouter provider. */
   openrouter?: Partial<OpenRouterConfig>;
+  /** DeepSeek config — only needed if using the deepseek provider. */
+  deepseek?: Partial<DeepSeekConfig>;
   /** Model override (applied to every request if set). */
   model?: string;
 }
@@ -46,6 +50,16 @@ export class ModelGateway {
 
     // Register OpenRouter if config or env vars are available.
     this.tryRegisterOpenRouter(config?.openrouter);
+
+    // Register DeepSeek if config or env vars are available.
+    this.tryRegisterDeepSeek(config?.deepseek);
+
+    // Honour the ZHCODE_PROVIDER env override, falling back to mock when the
+    // requested provider isn't registered (e.g. no API key configured).
+    const envProvider = process.env.ZHCODE_PROVIDER;
+    if (envProvider && this.providers.has(envProvider)) {
+      this.activeProviderName = envProvider;
+    }
   }
 
   // -------------------------------------------------------------------------
@@ -61,6 +75,17 @@ export class ModelGateway {
       );
     }
     this.activeProviderName = name;
+  }
+
+  /** Register a provider programmatically (e.g. scripted/custom adapters). */
+  registerProvider(name: string, provider: ModelProvider): void {
+    if (this.providers.has(name)) {
+      throw new ModelGatewayError(
+        `Provider "${name}" is already registered.`,
+        name,
+      );
+    }
+    this.providers.set(name, provider);
   }
 
   /** Get the currently active provider name. */
@@ -84,9 +109,7 @@ export class ModelGateway {
     request: ModelRequest,
     providerName?: string,
   ): Promise<ModelResponse> {
-    const provider = this.getProvider(
-      providerName ?? this.activeProviderName,
-    );
+    const provider = this.getProvider(providerName ?? this.activeProviderName);
     const model = request.model || this.resolveModel();
     return provider.generate({ ...request, model });
   }
@@ -96,9 +119,7 @@ export class ModelGateway {
     request: ModelRequest,
     providerName?: string,
   ): AsyncGenerator<ModelStreamChunk> {
-    const provider = this.getProvider(
-      providerName ?? this.activeProviderName,
-    );
+    const provider = this.getProvider(providerName ?? this.activeProviderName);
     const model = request.model || this.resolveModel();
     yield* provider.stream({ ...request, model });
   }
@@ -139,6 +160,22 @@ export class ModelGateway {
         ...partialConfig,
       };
       this.providers.set("openrouter", new OpenRouterProvider(config));
+    } catch {
+      // If env reading fails, silently skip — mock is always available.
+    }
+  }
+
+  private tryRegisterDeepSeek(partialConfig?: Partial<DeepSeekConfig>): void {
+    try {
+      const apiKey =
+        partialConfig?.apiKey ?? process.env.DEEPSEEK_API_KEY ?? "";
+      if (!apiKey) return;
+
+      const config: DeepSeekConfig = {
+        apiKey,
+        ...partialConfig,
+      };
+      this.providers.set("deepseek", new DeepSeekProvider(config));
     } catch {
       // If env reading fails, silently skip — mock is always available.
     }

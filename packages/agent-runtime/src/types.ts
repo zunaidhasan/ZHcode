@@ -36,7 +36,12 @@ export type AgentEvent =
   | { type: "iteration"; current: number; max: number }
   | { type: "error"; message: string; code?: string }
   | { type: "cancelled"; reason?: string }
-  | { type: "complete"; response: string; iterations: number; toolCalls: number };
+  | {
+      type: "complete";
+      response: string;
+      iterations: number;
+      toolCalls: number;
+    };
 
 // ---------------------------------------------------------------------------
 // Agent request / response
@@ -57,7 +62,8 @@ export interface AgentResponse {
   /** The final text response. */
   content: string;
   /** How the agent finished. */
-  status: "complete" | "error" | "cancelled" | "max_iterations" | "max_tool_calls";
+  status:
+    "complete" | "error" | "cancelled" | "max_iterations" | "max_tool_calls";
   /** Total iterations of the model loop. */
   iterations: number;
   /** Total tool calls executed. */

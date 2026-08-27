@@ -145,7 +145,11 @@ describe("ToolRegistry.execute()", () => {
       inputSchema: {},
       permission: "read",
       async execute() {
-        throw new ToolError("bad_tool", "Something went wrong", "EXECUTION_ERROR");
+        throw new ToolError(
+          "bad_tool",
+          "Something went wrong",
+          "EXECUTION_ERROR",
+        );
       },
     };
     registry.register(badTool);

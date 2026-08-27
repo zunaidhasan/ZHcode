@@ -24,7 +24,8 @@ export const editFileTool: Tool = {
       },
       oldText: {
         type: "string",
-        description: "The exact text to find and replace. Must appear exactly once.",
+        description:
+          "The exact text to find and replace. Must appear exactly once.",
       },
       newText: {
         type: "string",
@@ -35,7 +36,10 @@ export const editFileTool: Tool = {
   },
   permission: "write",
 
-  async execute(input: Record<string, unknown>, context: ToolContext): Promise<ToolResult> {
+  async execute(
+    input: Record<string, unknown>,
+    context: ToolContext,
+  ): Promise<ToolResult> {
     const relPath = input.path as string;
     const oldText = input.oldText as string;
     const newText = input.newText as string;
@@ -65,7 +69,11 @@ export const editFileTool: Tool = {
     try {
       content = await fs.readFile(absPath, "utf-8");
     } catch {
-      return { success: false, data: null, message: `File not found: ${relPath}` };
+      return {
+        success: false,
+        data: null,
+        message: `File not found: ${relPath}`,
+      };
     }
 
     const count = content.split(oldText).length - 1;

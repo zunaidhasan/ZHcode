@@ -17,7 +17,10 @@ afterEach(async () => {
 describe("FileIndex", () => {
   test("indexes files in project", async () => {
     await fs.writeFile(path.join(tmpDir, "index.ts"), "export {};");
-    await fs.writeFile(path.join(tmpDir, "app.ts"), "import {} from './index';");
+    await fs.writeFile(
+      path.join(tmpDir, "app.ts"),
+      "import {} from './index';",
+    );
 
     const index = new FileIndex(tmpDir);
     await index.build();

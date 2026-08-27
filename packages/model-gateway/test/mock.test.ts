@@ -25,7 +25,7 @@ describe("MockProvider.generate()", () => {
     const provider = new MockProvider();
     const res = await provider.generate(makeRequest("hello"));
 
-    expect(res.content).toContain("You said: \"hello\"");
+    expect(res.content).toContain('You said: "hello"');
     expect(res.model).toBe("mock-model");
     expect(res.finishReason).toBe("stop");
   });
@@ -69,7 +69,7 @@ describe("MockProvider.stream()", () => {
     }
 
     expect(done).toBe(true);
-    expect(chunks.join("")).toContain("You said: \"hello\"");
+    expect(chunks.join("")).toContain('You said: "hello"');
   });
 
   test("final chunk includes usage", async () => {

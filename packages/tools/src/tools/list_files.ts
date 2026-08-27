@@ -30,14 +30,18 @@ export const listFilesTool: Tool = {
     properties: {
       path: {
         type: "string",
-        description: "Directory path relative to the project root (default: '.')",
+        description:
+          "Directory path relative to the project root (default: '.')",
       },
     },
     required: [],
   },
   permission: "read",
 
-  async execute(input: Record<string, unknown>, context: ToolContext): Promise<ToolResult> {
+  async execute(
+    input: Record<string, unknown>,
+    context: ToolContext,
+  ): Promise<ToolResult> {
     const relPath = (input.path as string) ?? ".";
     let absPath: string;
 

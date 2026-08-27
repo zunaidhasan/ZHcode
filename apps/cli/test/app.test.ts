@@ -6,9 +6,15 @@ describe("ZHcodeApp commands", () => {
     const res = new ZHcodeApp().handle("/help");
     expect(res.action).toBe("continue");
     const text = res.lines.join("\n");
-    for (const cmd of ["/help", "/clear", "/version", "/exit"]) {
+    for (const cmd of ["/help", "/clear", "/version", "/init", "/exit"]) {
       expect(text).toContain(cmd);
     }
+  });
+
+  test("/init signals init action", () => {
+    const res = new ZHcodeApp().handle("/init");
+    expect(res.action).toBe("init");
+    expect(res.lines).toHaveLength(0);
   });
 
   test("/version reports the current version", () => {

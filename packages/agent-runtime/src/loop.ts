@@ -11,6 +11,7 @@
 import type { ToolResult } from "@zhcode/tools";
 import type { AgentContext } from "./context";
 import type { AgentResponse } from "./types";
+import type { ModelResponse } from "@zhcode/model-gateway";
 
 /** The system message prefix for tool results. */
 const TOOL_RESULT_PREFIX = "[Tool Result";
@@ -44,17 +45,18 @@ export async function runAgentLoop(ctx: AgentContext): Promise<AgentResponse> {
     }
 
     ctx.iterations++;
-    ctx.emit({ type: "iteration", current: ctx.iterations, max: ctx.config.maxIterations });
+    ctx.emit({
+      type: "iteration",
+      current: ctx.iterations,
+      max: ctx.config.maxIterations,
+    });
 
     // --- Step 1: Call the model ---
     ctx.emit({ type: "model_start", model: ctx.config.model || "default" });
 
-    let modelResponse;
+    let modelResponse: ModelResponse;
     try {
-      modelResponse = await ctx.gateway.generate({
-        messages: ctx.messages,
-        model: ctx.config.model,
-      });
+      modelResponse = await requestModel(ctx);
     } catch (err: unknown) {
       const errorMsg = err instanceof Error ? err.message : String(err);
       ctx.emit({ type: "error", message: `Model error: ${errorMsg}` });
@@ -142,6 +144,54 @@ export async function runAgentLoop(ctx: AgentContext): Promise<AgentResponse> {
 
     // Loop continues — model will be called again with the tool results.
   }
+}
+
+// ---------------------------------------------------------------------------
+// Model request (generate or stream)
+// ---------------------------------------------------------------------------
+
+/**
+ * Request a response from the model, either non-streaming or streaming.
+ *
+ * When streaming, each text delta is emitted as a `model_delta` event so the
+ * UI can render tokens as they arrive. The accumulated content is returned
+ * as a regular `ModelResponse`.
+ */
+async function requestModel(ctx: AgentContext): Promise<ModelResponse> {
+  const request = {
+    messages: ctx.messages,
+    model: ctx.config.model,
+  };
+
+  if (!ctx.config.stream) {
+    return ctx.gateway.generate(request);
+  }
+
+  let content = "";
+  let finishReason: ModelResponse["finishReason"] = "stop";
+  let usage: ModelResponse["usage"] = {
+    promptTokens: 0,
+    completionTokens: 0,
+    totalTokens: 0,
+  };
+
+  for await (const chunk of ctx.gateway.stream(request)) {
+    if (chunk.delta) {
+      content += chunk.delta;
+      ctx.emit({ type: "model_delta", delta: chunk.delta });
+    }
+    if (chunk.done) {
+      finishReason = chunk.finishReason ?? finishReason;
+      usage = chunk.usage ?? usage;
+    }
+  }
+
+  return {
+    content,
+    model: ctx.config.model || "default",
+    usage,
+    finishReason,
+  };
 }
 
 // ---------------------------------------------------------------------------

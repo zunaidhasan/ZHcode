@@ -35,4 +35,8 @@ export type {
 } from "./specialized";
 
 // Explorer Agent
-export { ExplorerAgent, type ExplorerAgentOptions, type ExplorerConfig } from "./explorer";
+export {
+  ExplorerAgent,
+  type ExplorerAgentOptions,
+  type ExplorerConfig,
+} from "./explorer";

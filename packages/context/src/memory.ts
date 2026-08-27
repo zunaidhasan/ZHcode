@@ -38,7 +38,11 @@ export class MemoryStore {
   async save(): Promise<void> {
     const dir = path.join(this.root, MEMORY_DIR);
     await fs.mkdir(dir, { recursive: true });
-    await fs.writeFile(this.memoryPath, JSON.stringify(this.memory, null, 2), "utf-8");
+    await fs.writeFile(
+      this.memoryPath,
+      JSON.stringify(this.memory, null, 2),
+      "utf-8",
+    );
   }
 
   /** Add a memory entry. */

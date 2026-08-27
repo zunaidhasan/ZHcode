@@ -89,7 +89,10 @@ describe("ExplorerAgent configuration", () => {
 
 describe("ExplorerAgent.run()", () => {
   test("returns a result with summary", async () => {
-    await fs.writeFile(path.join(tmpDir, "auth.ts"), "export function login() {}");
+    await fs.writeFile(
+      path.join(tmpDir, "auth.ts"),
+      "export function login() {}",
+    );
 
     const explorer = createExplorer();
     const result = await explorer.run({ task: "Find authentication code" });
@@ -167,12 +170,21 @@ describe("ExplorerAgent with project", () => {
     // Create a realistic project structure.
     await fs.mkdir(path.join(tmpDir, "src"));
     await fs.writeFile(path.join(tmpDir, "tsconfig.json"), "{}");
-    await fs.writeFile(path.join(tmpDir, "package.json"), JSON.stringify({
-      name: "test-app",
-      dependencies: { react: "^18.0.0" },
-    }));
-    await fs.writeFile(path.join(tmpDir, "src", "app.ts"), "export const app = {};");
-    await fs.writeFile(path.join(tmpDir, "src", "auth.ts"), "export function login() {}");
+    await fs.writeFile(
+      path.join(tmpDir, "package.json"),
+      JSON.stringify({
+        name: "test-app",
+        dependencies: { react: "^18.0.0" },
+      }),
+    );
+    await fs.writeFile(
+      path.join(tmpDir, "src", "app.ts"),
+      "export const app = {};",
+    );
+    await fs.writeFile(
+      path.join(tmpDir, "src", "auth.ts"),
+      "export function login() {}",
+    );
 
     const explorer = createExplorer();
     const result = await explorer.run({ task: "What does this project do?" });
@@ -197,7 +209,9 @@ describe("ExplorerAgent with project", () => {
       config: { maxIterations: 1, maxToolCalls: 5 },
     });
 
-    const result = await explorer.run({ task: "Explore everything thoroughly" });
+    const result = await explorer.run({
+      task: "Explore everything thoroughly",
+    });
     expect(result.iterations).toBeLessThanOrEqual(1);
   });
 });
@@ -211,21 +225,30 @@ describe("ExplorerAgent integration", () => {
     // Create a mock project with authentication.
     await fs.mkdir(path.join(tmpDir, "src"));
     await fs.mkdir(path.join(tmpDir, "src", "auth"));
-    await fs.writeFile(path.join(tmpDir, "src", "auth", "login.ts"), `
+    await fs.writeFile(
+      path.join(tmpDir, "src", "auth", "login.ts"),
+      `
 export function login(username: string, password: string) {
   return authenticate(username, password);
 }
-`);
-    await fs.writeFile(path.join(tmpDir, "src", "auth", "service.ts"), `
+`,
+    );
+    await fs.writeFile(
+      path.join(tmpDir, "src", "auth", "service.ts"),
+      `
 import { login } from './login';
 export class AuthService {
   login(user: string, pass: string) { return login(user, pass); }
 }
-`);
-    await fs.writeFile(path.join(tmpDir, "src", "app.ts"), `
+`,
+    );
+    await fs.writeFile(
+      path.join(tmpDir, "src", "app.ts"),
+      `
 import { AuthService } from './auth/service';
 const auth = new AuthService();
-`);
+`,
+    );
 
     const explorer = createExplorer();
     const result = await explorer.run({

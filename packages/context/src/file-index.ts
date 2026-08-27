@@ -135,7 +135,9 @@ export class FileIndex {
       if (entry.name.startsWith(".") && entry.name !== ".env.example") continue;
 
       const fullPath = path.join(dir, entry.name);
-      const relativePath = path.relative(this.root, fullPath).replace(/\\/g, "/");
+      const relativePath = path
+        .relative(this.root, fullPath)
+        .replace(/\\/g, "/");
 
       if (entry.isDirectory()) {
         await this.scanDir(fullPath);

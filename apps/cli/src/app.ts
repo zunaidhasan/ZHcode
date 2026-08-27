@@ -22,6 +22,8 @@
 import { COMMAND_TABLE, parseInput } from "./commands";
 import { Session } from "./session";
 import { VERSION } from "./version";
+import { initializeProject, formatProjectInfo } from "./init";
+import type { ProjectInfo } from "./init";
 import { ModelGateway } from "@zhcode/model-gateway";
 import type { ModelMessage } from "@zhcode/model-gateway";
 import { Agent } from "@zhcode/agent-runtime";
@@ -30,10 +32,10 @@ import { createDefaultRegistry } from "@zhcode/tools";
 import { ToolContext } from "@zhcode/tools";
 import * as process from "node:process";
 
-export type AppAction = "continue" | "clear" | "exit" | "agent";
+export type AppAction = "continue" | "clear" | "exit" | "agent" | "init";
 
 export interface AppResponse {
-  /** Lines to render in the terminal (empty when action is "agent"). */
+  /** Lines to render in the terminal (empty when action is "agent" or "init"). */
   lines: string[];
   /** What the REPL should do next. */
   action: AppAction;
@@ -49,6 +51,8 @@ const HELP_LINES: string[] = [
 export class ZHcodeApp {
   readonly session: Session = new Session();
   readonly gateway: ModelGateway;
+  /** Whether agent responses stream tokens to the UI. */
+  readonly streamEnabled = true;
   private readonly agent: Agent;
   private readonly toolContext: ToolContext;
   private abortController: AbortController | null = null;
@@ -65,6 +69,7 @@ export class ZHcodeApp {
       gateway: this.gateway,
       toolRegistry,
       toolContext: this.toolContext,
+      config: { stream: true },
     });
   }
 
@@ -90,11 +95,17 @@ export class ZHcodeApp {
     this.abortController?.abort();
   }
 
+  /** Initialize project metadata (the /init command). */
+  async initProject(): Promise<{ lines: string[]; info: ProjectInfo }> {
+    const { info } = await initializeProject(process.cwd());
+    return { lines: formatProjectInfo(info), info };
+  }
+
   /** Run the agent with a user message. */
   async runAgent(
     message: string,
     _onEvent?: AgentEventHandler,
-  ): Promise<{ content: string; status: string }> {
+  ): Promise<{ content: string; status: string; streamed: boolean }> {
     this.abortController = new AbortController();
 
     const response = await this.agent.run(
@@ -113,6 +124,7 @@ export class ZHcodeApp {
     return {
       content: response.content,
       status: response.status,
+      streamed: this.streamEnabled,
     };
   }
 
@@ -142,7 +154,7 @@ export class ZHcodeApp {
   }
 
   private handleCommand(
-    name: "help" | "clear" | "version" | "exit",
+    name: "help" | "clear" | "version" | "exit" | "init",
   ): AppResponse {
     switch (name) {
       case "help":
@@ -154,6 +166,10 @@ export class ZHcodeApp {
 
       case "version":
         return { lines: [`ZHcode v${VERSION}`], action: "continue" };
+
+      case "init":
+        // Initialization is async; the REPL awaits initProject().
+        return { lines: [], action: "init" };
 
       case "exit":
         return { lines: ["Goodbye! 👋"], action: "exit" };

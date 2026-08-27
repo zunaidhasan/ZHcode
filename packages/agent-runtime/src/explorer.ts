@@ -105,7 +105,8 @@ export interface ExplorerAgentOptions {
 export class ExplorerAgent implements SpecializedAgent {
   readonly id = "explorer";
   readonly name = "Explorer Agent";
-  readonly description = "Investigates the codebase and produces structured findings. Read-only.";
+  readonly description =
+    "Investigates the codebase and produces structured findings. Read-only.";
   readonly systemPrompt = EXPLORER_SYSTEM_PROMPT;
   readonly capabilities: AgentCapability[] = ["search", "read", "analyze"];
   readonly toolPolicy: PermissionLevel[] = ["read"];
@@ -209,7 +210,8 @@ export class ExplorerAgent implements SpecializedAgent {
         findings: parsed.findings ?? [],
         dependencies: parsed.dependencies ?? [],
         suspectedAreas: parsed.suspectedAreas ?? [],
-        confidence: typeof parsed.confidence === "number" ? parsed.confidence : 0.5,
+        confidence:
+          typeof parsed.confidence === "number" ? parsed.confidence : 0.5,
         recommendedNextSteps: parsed.recommendedNextSteps ?? [],
       };
     } catch {

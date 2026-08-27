@@ -29,7 +29,6 @@ export interface ContextEngineOptions {
 }
 
 export class ContextEngine {
-  private readonly root: string;
   private scanner: ProjectScanner;
   private structureBuilder: StructureBuilder;
   private explorer: CodebaseExplorer;
@@ -41,7 +40,6 @@ export class ContextEngine {
   private projectStructure: ProjectStructure | null = null;
 
   constructor(options: ContextEngineOptions) {
-    this.root = options.root;
     this.scanner = new ProjectScanner(options.root);
     this.structureBuilder = new StructureBuilder(options.root);
     this.explorer = new CodebaseExplorer({ root: options.root, maxFiles: 15 });
@@ -125,7 +123,9 @@ export class ContextEngine {
 
     // Add memory context if available.
     const memoryText = this.memory.format();
-    const memoryTokens = memoryText ? this.budget.estimateTokens(memoryText) : 0;
+    const memoryTokens = memoryText
+      ? this.budget.estimateTokens(memoryText)
+      : 0;
 
     return {
       project: this.projectContext!,

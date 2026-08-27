@@ -82,7 +82,9 @@ describe("ToolContext", () => {
     const ctx = new ToolContext({ projectRoot: TEST_ROOT });
     const resolved = ctx.resolvePath("src/index.ts");
     expect(resolved).toContain("src/index.ts");
-    expect(resolved).toContain(TEST_ROOT.replace(/\\/g, "/").split("/").pop() ?? "");
+    expect(resolved).toContain(
+      TEST_ROOT.replace(/\\/g, "/").split("/").pop() ?? "",
+    );
   });
 
   test("prevents path traversal", () => {
@@ -90,6 +92,42 @@ describe("ToolContext", () => {
     expect(() => ctx.resolvePath("../../etc/passwd")).toThrow(
       /outside project root/,
     );
+  });
+
+  test("blocks .env files by default", () => {
+    const ctx = new ToolContext({ projectRoot: TEST_ROOT });
+    expect(() => ctx.resolvePath(".env")).toThrow(/blocked/);
+    expect(() => ctx.resolvePath("config/.env.local")).toThrow(/blocked/);
+  });
+
+  test("blocks .git directories by default", () => {
+    const ctx = new ToolContext({ projectRoot: TEST_ROOT });
+    expect(() => ctx.resolvePath(".git/config")).toThrow(/blocked/);
+    expect(() => ctx.resolvePath("src/.git/HEAD")).toThrow(/blocked/);
+  });
+
+  test("allowSensitivePaths disables default blocking", () => {
+    const ctx = new ToolContext({
+      projectRoot: TEST_ROOT,
+      allowSensitivePaths: true,
+    });
+    expect(ctx.resolvePath(".env")).toContain(".env");
+    expect(ctx.resolvePath(".git/config")).toContain(".git");
+  });
+
+  test("custom blocked paths are honoured", () => {
+    const ctx = new ToolContext({
+      projectRoot: TEST_ROOT,
+      blockedPaths: [/(^|\/)secrets\.txt$/],
+    });
+    expect(() => ctx.resolvePath("secrets.txt")).toThrow(/blocked/);
+    expect(ctx.resolvePath("notes.txt")).toContain("notes.txt");
+  });
+
+  test("isBlockedPath reports sensitive paths", () => {
+    const ctx = new ToolContext({ projectRoot: TEST_ROOT });
+    expect(ctx.isBlockedPath(`${TEST_ROOT}/.env`)).toBe(true);
+    expect(ctx.isBlockedPath(`${TEST_ROOT}/src/index.ts`)).toBe(false);
   });
 
   test("defaults cwd to projectRoot", () => {

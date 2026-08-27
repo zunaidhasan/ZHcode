@@ -42,10 +42,15 @@ export class BudgetManager {
   selectFiles(
     rankedFiles: FileMetadata[],
     contents: Map<string, string>,
-  ): { selected: FileMetadata[]; totalTokens: number; budgetExceeded: boolean } {
+  ): {
+    selected: FileMetadata[];
+    totalTokens: number;
+    budgetExceeded: boolean;
+  } {
     const selected: FileMetadata[] = [];
     let totalTokens = 0;
-    const maxTokensForFiles = this.budget.maxTokens - this.budget.reservedOutputTokens;
+    const maxTokensForFiles =
+      this.budget.maxTokens - this.budget.reservedOutputTokens;
     let budgetExceeded = false;
 
     for (const file of rankedFiles) {

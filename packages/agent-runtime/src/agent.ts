@@ -59,7 +59,11 @@ export class Agent {
 
     // Add the user's message if it's not already the last message.
     const lastMsg = messages[messages.length - 1];
-    if (!lastMsg || lastMsg.role !== "user" || lastMsg.content !== request.message) {
+    if (
+      !lastMsg ||
+      lastMsg.role !== "user" ||
+      lastMsg.content !== request.message
+    ) {
       messages.push({ role: "user", content: request.message });
     }
 
@@ -69,15 +73,16 @@ export class Agent {
       : this.defaultConfig;
 
     // Merge event handlers: instance handler + request-specific handler.
-    const mergedHandler: AgentEventHandler | undefined = this.onEvent || request.signal
-      ? (event) => {
-          this.onEvent?.(event);
-          // If cancelled, abort the signal.
-          if (event.type === "cancelled" && request.signal) {
-            request.signal.throwIfAborted();
+    const mergedHandler: AgentEventHandler | undefined =
+      this.onEvent || request.signal
+        ? (event) => {
+            this.onEvent?.(event);
+            // If cancelled, abort the signal.
+            if (event.type === "cancelled" && request.signal) {
+              request.signal.throwIfAborted();
+            }
           }
-        }
-      : undefined;
+        : undefined;
 
     const ctx = new AgentContext({
       gateway: this.gateway,

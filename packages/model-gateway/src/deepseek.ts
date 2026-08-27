@@ -1,53 +1,54 @@
 /**
- * OpenRouter provider — the first real LLM backend.
+ * DeepSeek provider — a real, low-cost LLM backend.
  *
- * Uses the OpenRouter API (https://openrouter.ai/docs) which provides
- * access to DeepSeek, Claude, GPT, Gemini, and many other models.
+ * DeepSeek is OpenAI-API-compatible (https://api-docs.deepseek.com). It is one
+ * of the cheapest production models available, which fits ZHcode's
+ * "cost-aware, near-zero infrastructure cost" goal.
  *
- * Auth: set OPENROUTER_API_KEY in .env or process.env.
- * Model: set ZHCODE_MODEL (default: "deepseek/deepseek-chat").
+ * Auth: set DEEPSEEK_API_KEY in .env or process.env.
+ * Model: set ZHCODE_MODEL or pass model in the request (default: "deepseek-chat").
  */
 
-import type { ModelProvider } from "./provider";
+import type { ModelProvider } from "@zhcode/core";
 import type {
   ModelRequest,
   ModelResponse,
   ModelStreamChunk,
   ProviderInfo,
-} from "./types";
+} from "@zhcode/core";
 import {
   AuthenticationError,
+  InvalidResponseError,
   NetworkError,
+  ProviderUnavailableError,
   RateLimitError,
   TimeoutError,
-  InvalidResponseError,
-  ProviderUnavailableError,
 } from "./errors";
 
 // ---------------------------------------------------------------------------
 // Configuration
 // ---------------------------------------------------------------------------
 
-export interface OpenRouterConfig {
+export interface DeepSeekConfig {
   apiKey: string;
   baseUrl?: string;
   model?: string;
   timeoutMs?: number;
 }
 
-const DEFAULT_BASE_URL = "https://openrouter.ai/api/v1";
-const DEFAULT_MODEL = "deepseek/deepseek-chat";
+const DEFAULT_BASE_URL = "https://api.deepseek.com";
+const DEFAULT_MODEL = "deepseek-chat";
 const DEFAULT_TIMEOUT_MS = 60_000;
 
 // ---------------------------------------------------------------------------
-// OpenRouterProvider
+// DeepSeekProvider
 // ---------------------------------------------------------------------------
 
-export class OpenRouterProvider implements ModelProvider {
-  readonly name = "openrouter";
-  private readonly config: Required<OpenRouterConfig>;
+export class DeepSeekProvider implements ModelProvider {
+  readonly name = "deepseek";
+  private readonly config: Required<DeepSeekConfig>;
 
-  constructor(config: OpenRouterConfig) {
+  constructor(config: DeepSeekConfig) {
     this.config = {
       apiKey: config.apiKey,
       baseUrl: config.baseUrl ?? DEFAULT_BASE_URL,
@@ -58,11 +59,11 @@ export class OpenRouterProvider implements ModelProvider {
 
   info(): ProviderInfo {
     return {
-      name: "openrouter",
-      models: [this.config.model],
+      name: "deepseek",
+      models: [this.config.model, "deepseek-chat", "deepseek-reasoner"],
       capabilities: {
         streaming: true,
-        toolCalling: true,
+        toolCalling: false,
         maxContextTokens: 128_000,
       },
     };
@@ -93,7 +94,7 @@ export class OpenRouterProvider implements ModelProvider {
     const reader = response.body?.getReader();
     if (!reader) {
       throw new InvalidResponseError(
-        "openrouter",
+        "deepseek",
         "Response body is not readable.",
       );
     }
@@ -158,7 +159,6 @@ export class OpenRouterProvider implements ModelProvider {
       reader.releaseLock();
     }
 
-    // If we reach here without [DONE], yield a final chunk.
     yield {
       delta: "",
       done: true,
@@ -201,20 +201,15 @@ export class OpenRouterProvider implements ModelProvider {
         headers: {
           Authorization: `Bearer ${this.config.apiKey}`,
           "Content-Type": "application/json",
-          "HTTP-Referer": "https://zhcode.dev",
-          "X-Title": "ZHcode",
         },
         body: JSON.stringify(body),
         signal: controller.signal,
       });
     } catch (err: unknown) {
       if (err instanceof DOMException && err.name === "AbortError") {
-        throw new TimeoutError("openrouter", this.config.timeoutMs);
+        throw new TimeoutError("deepseek", this.config.timeoutMs);
       }
-      if (err instanceof TypeError) {
-        throw new NetworkError("openrouter", String(err));
-      }
-      throw new NetworkError("openrouter", String(err));
+      throw new NetworkError("deepseek", String(err));
     } finally {
       clearTimeout(timeout);
     }
@@ -247,19 +242,19 @@ export class OpenRouterProvider implements ModelProvider {
     }
 
     if (status === 401 || status === 403) {
-      throw new AuthenticationError("openrouter", detail);
+      throw new AuthenticationError("deepseek", detail);
     }
     if (status === 429) {
       const retryAfter = response.headers.get("Retry-After");
       throw new RateLimitError(
-        "openrouter",
+        "deepseek",
         retryAfter ? parseInt(retryAfter, 10) * 1000 : undefined,
       );
     }
     if (status >= 500) {
-      throw new ProviderUnavailableError("openrouter", detail);
+      throw new ProviderUnavailableError("deepseek", detail);
     }
-    throw new InvalidResponseError("openrouter", detail);
+    throw new InvalidResponseError("deepseek", detail);
   }
 
   // -------------------------------------------------------------------------
@@ -274,7 +269,7 @@ export class OpenRouterProvider implements ModelProvider {
     const choice = choices?.[0];
     if (!choice) {
       throw new InvalidResponseError(
-        "openrouter",
+        "deepseek",
         "Response contained no choices.",
       );
     }
@@ -283,7 +278,7 @@ export class OpenRouterProvider implements ModelProvider {
     const content = message?.content;
     if (typeof content !== "string") {
       throw new InvalidResponseError(
-        "openrouter",
+        "deepseek",
         "Response message has no content.",
       );
     }

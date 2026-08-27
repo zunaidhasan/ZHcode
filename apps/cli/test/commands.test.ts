@@ -2,7 +2,7 @@ import { describe, expect, test } from "bun:test";
 import { parseInput } from "../src/commands";
 
 describe("parseInput", () => {
-  test("parses all four supported commands (case-insensitive)", () => {
+  test("parses all supported commands (case-insensitive)", () => {
     expect(parseInput("/help")).toEqual({ kind: "command", name: "help" });
     expect(parseInput("/HELP")).toEqual({ kind: "command", name: "help" });
     expect(parseInput("/exit")).toEqual({ kind: "command", name: "exit" });
@@ -11,6 +11,7 @@ describe("parseInput", () => {
       kind: "command",
       name: "version",
     });
+    expect(parseInput("/init")).toEqual({ kind: "command", name: "init" });
   });
 
   test("trims whitespace before parsing commands", () => {

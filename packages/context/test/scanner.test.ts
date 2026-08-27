@@ -23,7 +23,10 @@ describe("ProjectScanner", () => {
   });
 
   test("detects Python from pyproject.toml", async () => {
-    await fs.writeFile(path.join(tmpDir, "pyproject.toml"), "[project]\nname = 'test'");
+    await fs.writeFile(
+      path.join(tmpDir, "pyproject.toml"),
+      "[project]\nname = 'test'",
+    );
     const scanner = new ProjectScanner(tmpDir);
     const ctx = await scanner.scan();
     expect(ctx.language).toBe("python");
@@ -37,9 +40,12 @@ describe("ProjectScanner", () => {
   });
 
   test("detects TypeScript from package.json dependencies", async () => {
-    await fs.writeFile(path.join(tmpDir, "package.json"), JSON.stringify({
-      dependencies: { typescript: "^5.0.0" },
-    }));
+    await fs.writeFile(
+      path.join(tmpDir, "package.json"),
+      JSON.stringify({
+        dependencies: { typescript: "^5.0.0" },
+      }),
+    );
     const scanner = new ProjectScanner(tmpDir);
     const ctx = await scanner.scan();
     expect(ctx.language).toBe("typescript");
@@ -60,18 +66,24 @@ describe("ProjectScanner", () => {
   });
 
   test("detects React framework", async () => {
-    await fs.writeFile(path.join(tmpDir, "package.json"), JSON.stringify({
-      dependencies: { react: "^18.0.0" },
-    }));
+    await fs.writeFile(
+      path.join(tmpDir, "package.json"),
+      JSON.stringify({
+        dependencies: { react: "^18.0.0" },
+      }),
+    );
     const scanner = new ProjectScanner(tmpDir);
     const ctx = await scanner.scan();
     expect(ctx.frameworks).toContain("react");
   });
 
   test("detects monorepo with workspaces", async () => {
-    await fs.writeFile(path.join(tmpDir, "package.json"), JSON.stringify({
-      workspaces: ["packages/*"],
-    }));
+    await fs.writeFile(
+      path.join(tmpDir, "package.json"),
+      JSON.stringify({
+        workspaces: ["packages/*"],
+      }),
+    );
     const scanner = new ProjectScanner(tmpDir);
     const ctx = await scanner.scan();
     expect(ctx.isMonorepo).toBe(true);
@@ -86,10 +98,13 @@ describe("ProjectScanner", () => {
   });
 
   test("reads project name from package.json", async () => {
-    await fs.writeFile(path.join(tmpDir, "package.json"), JSON.stringify({
-      name: "my-project",
-      description: "A test project",
-    }));
+    await fs.writeFile(
+      path.join(tmpDir, "package.json"),
+      JSON.stringify({
+        name: "my-project",
+        description: "A test project",
+      }),
+    );
     const scanner = new ProjectScanner(tmpDir);
     const ctx = await scanner.scan();
     expect(ctx.name).toBe("my-project");

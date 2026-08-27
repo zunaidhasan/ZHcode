@@ -13,7 +13,7 @@ const WEIGHTS = {
   pathMatch: 0.25,
   extensionBonus: 0.15,
   importanceBonus: 0.15,
-  recencyBonus: 0.10,
+  recencyBonus: 0.1,
 };
 
 /** Extensions that are more likely to contain relevant code. */

@@ -120,7 +120,10 @@ describe("AgentContext", () => {
   test("shouldStop returns false when within limits", () => {
     const gw = new ModelGateway();
     const registry = createDefaultRegistry();
-    const toolContext = new ToolContext({ projectRoot: tmpDir, permissions: ["read"] });
+    const toolContext = new ToolContext({
+      projectRoot: tmpDir,
+      permissions: ["read"],
+    });
     const config = createAgentConfig({ maxIterations: 10 });
 
     const ctx = new AgentContext({
@@ -139,7 +142,10 @@ describe("AgentContext", () => {
   test("shouldStop returns true when iteration limit reached", () => {
     const gw = new ModelGateway();
     const registry = createDefaultRegistry();
-    const toolContext = new ToolContext({ projectRoot: tmpDir, permissions: ["read"] });
+    const toolContext = new ToolContext({
+      projectRoot: tmpDir,
+      permissions: ["read"],
+    });
     const config = createAgentConfig({ maxIterations: 3 });
 
     const ctx = new AgentContext({
@@ -159,7 +165,10 @@ describe("AgentContext", () => {
   test("shouldStop returns true when tool call limit reached", () => {
     const gw = new ModelGateway();
     const registry = createDefaultRegistry();
-    const toolContext = new ToolContext({ projectRoot: tmpDir, permissions: ["read"] });
+    const toolContext = new ToolContext({
+      projectRoot: tmpDir,
+      permissions: ["read"],
+    });
     const config = createAgentConfig({ maxToolCalls: 5 });
 
     const ctx = new AgentContext({
@@ -180,7 +189,10 @@ describe("AgentContext", () => {
     const events: AgentEvent[] = [];
     const gw = new ModelGateway();
     const registry = createDefaultRegistry();
-    const toolContext = new ToolContext({ projectRoot: tmpDir, permissions: ["read"] });
+    const toolContext = new ToolContext({
+      projectRoot: tmpDir,
+      permissions: ["read"],
+    });
     const config = createAgentConfig();
 
     const ctx = new AgentContext({
@@ -264,7 +276,9 @@ describe("Agent — cancellation", () => {
     });
 
     // The agent should handle the cancellation.
-    expect(response.status === "cancelled" || response.status === "complete").toBe(true);
+    expect(
+      response.status === "cancelled" || response.status === "complete",
+    ).toBe(true);
   });
 });
 

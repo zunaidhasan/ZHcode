@@ -26,7 +26,13 @@ describe("createDefaultRegistry()", () => {
 
   test("all tools have valid permission levels", () => {
     const registry = createDefaultRegistry();
-    const validPermissions = new Set(["read", "write", "execute", "network", "git"]);
+    const validPermissions = new Set([
+      "read",
+      "write",
+      "execute",
+      "network",
+      "git",
+    ]);
     const tools = registry.listTools();
     for (const tool of tools) {
       expect(validPermissions.has(tool.permission)).toBe(true);

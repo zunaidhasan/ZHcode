@@ -42,17 +42,25 @@ async function searchWithRipgrep(
 ): Promise<SearchMatch[]> {
   const args = [
     "--json",
-    "--max-count", String(MAX_MATCHES),
+    "--max-count",
+    String(MAX_MATCHES),
     "--no-heading",
     "-n",
     // Always exclude common large/irrelevant directories
-    "--glob", "!node_modules",
-    "--glob", "!.git",
-    "--glob", "!dist",
-    "--glob", "!build",
-    "--glob", "!.next",
-    "--glob", "!.cache",
-    "--glob", "!coverage",
+    "--glob",
+    "!node_modules",
+    "--glob",
+    "!.git",
+    "--glob",
+    "!dist",
+    "--glob",
+    "!build",
+    "--glob",
+    "!.next",
+    "--glob",
+    "!.cache",
+    "--glob",
+    "!coverage",
   ];
 
   if (input.caseInsensitive) args.push("-i");
@@ -106,7 +114,12 @@ async function searchNative(
         await searchDir(fullPath);
       } else if (entry.isFile()) {
         // Skip binary files by extension.
-        if (/\.(png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot|map)$/.test(entry.name)) continue;
+        if (
+          /\.(png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot|map)$/.test(
+            entry.name,
+          )
+        )
+          continue;
         try {
           const content = await fs.readFile(fullPath, "utf-8");
           const lines = content.split("\n");
@@ -150,7 +163,8 @@ export const searchFilesTool: Tool = {
       },
       path: {
         type: "string",
-        description: "Directory to search within (relative to project root). Default: entire project.",
+        description:
+          "Directory to search within (relative to project root). Default: entire project.",
       },
       caseInsensitive: {
         type: "boolean",
@@ -165,7 +179,10 @@ export const searchFilesTool: Tool = {
   },
   permission: "read",
 
-  async execute(input: Record<string, unknown>, context: ToolContext): Promise<ToolResult> {
+  async execute(
+    input: Record<string, unknown>,
+    context: ToolContext,
+  ): Promise<ToolResult> {
     const query = input.query as string;
     if (!query) {
       return { success: false, data: null, message: "query is required" };

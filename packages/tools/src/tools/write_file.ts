@@ -52,7 +52,10 @@ export const writeFileTool: Tool = {
 
     return {
       success: true,
-      data: { path: relPath, bytesWritten: Buffer.byteLength(content, "utf-8") },
+      data: {
+        path: relPath,
+        bytesWritten: Buffer.byteLength(content, "utf-8"),
+      },
       message: `File written: ${relPath}`,
     };
   },

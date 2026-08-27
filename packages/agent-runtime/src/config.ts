@@ -21,6 +21,8 @@ export interface AgentConfig {
   systemPrompt: string;
   /** Model to use (empty = provider default). */
   model: string;
+  /** Stream model output (default: false). */
+  stream: boolean;
 }
 
 const DEFAULT_SYSTEM_PROMPT = `You are ZHcode, a helpful AI coding assistant.
@@ -31,9 +33,7 @@ Use tools when you need to look at files, search code, or make changes.
 Be concise and helpful. When using tools, explain what you're doing.`;
 
 /** Create a config with defaults, overridden by partial values. */
-export function createAgentConfig(
-  partial?: Partial<AgentConfig>,
-): AgentConfig {
+export function createAgentConfig(partial?: Partial<AgentConfig>): AgentConfig {
   return {
     maxIterations: partial?.maxIterations ?? 20,
     maxToolCalls: partial?.maxToolCalls ?? 50,
@@ -41,5 +41,6 @@ export function createAgentConfig(
     permissions: partial?.permissions ?? ["read", "write", "execute", "git"],
     systemPrompt: partial?.systemPrompt ?? DEFAULT_SYSTEM_PROMPT,
     model: partial?.model ?? "",
+    stream: partial?.stream ?? false,
   };
 }

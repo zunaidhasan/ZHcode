@@ -35,7 +35,8 @@ export type ProjectFramework =
   | "rails"
   | "unknown";
 
-export type PackageManager = "npm" | "yarn" | "pnpm" | "bun" | "pip" | "composer" | "cargo" | "unknown";
+export type PackageManager =
+  "npm" | "yarn" | "pnpm" | "bun" | "pip" | "composer" | "cargo" | "unknown";
 
 export interface ProjectContext {
   /** Absolute path to project root. */
@@ -117,12 +118,12 @@ export interface ContextRequest {
 }
 
 export type ContextIntent =
-  | "explain_project"    // "Explain this project"
-  | "find_code"          // "Where is X implemented?"
-  | "fix_bug"            // "Fix the login bug"
-  | "add_feature"        // "Add a new feature"
-  | "refactor"           // "Refactor this code"
-  | "general"            // General questions
+  | "explain_project" // "Explain this project"
+  | "find_code" // "Where is X implemented?"
+  | "fix_bug" // "Fix the login bug"
+  | "add_feature" // "Add a new feature"
+  | "refactor" // "Refactor this code"
+  | "general" // General questions
   | "unknown";
 
 export interface ContextResponse {
