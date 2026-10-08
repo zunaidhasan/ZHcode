@@ -55,6 +55,8 @@ export interface AgentRequest {
   systemPrompt?: string;
   /** AbortSignal for cancellation. */
   signal?: AbortSignal;
+  /** Per-run event handler (merged with the Agent instance handler). */
+  onEvent?: AgentEventHandler;
 }
 
 /** What the agent returns after completing. */
