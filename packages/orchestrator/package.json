@@ -1,0 +1,19 @@
+{
+  "name": "@zhcode/orchestrator",
+  "version": "0.1.0",
+  "description": "Multi-agent software engineering workflow orchestrator",
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "dependencies": {
+    "@zhcode/core": "workspace:*",
+    "@zhcode/model-gateway": "workspace:*",
+    "@zhcode/model-router": "workspace:*",
+    "@zhcode/agent-registry": "workspace:*",
+    "@zhcode/agent-runtime": "workspace:*",
+    "@zhcode/context": "workspace:*",
+    "@zhcode/tools": "workspace:*",
+    "@zhcode/git": "workspace:*",
+    "@zhcode/verification": "workspace:*"
+  }
+}

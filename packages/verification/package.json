@@ -1,0 +1,11 @@
+{
+  "name": "@zhcode/verification",
+  "version": "0.1.0",
+  "description": "Automated verification: tests, typecheck, lint",
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "dependencies": {
+    "@zhcode/core": "workspace:*"
+  }
+}
