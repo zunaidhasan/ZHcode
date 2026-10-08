@@ -40,6 +40,15 @@ export interface ModelRequest {
   temperature?: number;
   /** If true, the response should stream. */
   stream?: boolean;
+  /** JSON-schema tool definitions for native tool calling. */
+  tools?: ModelToolDefinition[];
+}
+
+/** A tool definition advertised to a provider that supports native tool calling. */
+export interface ModelToolDefinition {
+  name: string;
+  description: string;
+  inputSchema: Record<string, unknown>;
 }
 
 /** A complete (non-streaming) response from a model. */
@@ -52,6 +61,8 @@ export interface ModelResponse {
   usage: ModelUsage;
   /** Why the model stopped generating. */
   finishReason: "stop" | "length" | "tool_calls" | "content_filter" | "error";
+  /** Native provider tool calls, when the model requested tools. */
+  toolCalls?: ModelToolCall[];
 }
 
 // ---------------------------------------------------------------------------
