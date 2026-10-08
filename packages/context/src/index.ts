@@ -41,3 +41,5 @@ export { MemoryStore } from "./memory";
 
 // Context Engine
 export { ContextEngine, type ContextEngineOptions } from "./engine";
+
+export { formatContext } from "./format";
