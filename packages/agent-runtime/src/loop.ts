@@ -72,8 +72,8 @@ export async function runAgentLoop(ctx: AgentContext): Promise<AgentResponse> {
 
     ctx.emit({ type: "model_end", response: modelResponse });
 
-    // --- Step 2: Check for tool calls ---
-    const toolCalls = parseToolCalls(modelResponse.content);
+    // --- Step 2: Check for tool calls (native first, markdown fallback) ---
+    const toolCalls = collectToolCalls(modelResponse);
 
     if (toolCalls.length === 0) {
       // No tool calls — this is the final response.
@@ -217,6 +217,30 @@ export interface ParsedToolCall {
  * { "query": "auth" }
  * ```
  */
+/**
+ * Collect tool calls from a model response.
+ * Native `toolCalls` win; otherwise parse markdown ```tool blocks.
+ */
+export function collectToolCalls(response: ModelResponse): ParsedToolCall[] {
+  if (response.toolCalls && response.toolCalls.length > 0) {
+    return response.toolCalls.map((call) => {
+      let args: Record<string, unknown> = {};
+      try {
+        const parsed: unknown = JSON.parse(call.arguments || "{}");
+        if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
+          args = parsed as Record<string, unknown>;
+        } else {
+          args = { raw: call.arguments };
+        }
+      } catch {
+        args = { raw: call.arguments };
+      }
+      return { name: call.name, arguments: args };
+    });
+  }
+  return parseToolCalls(response.content);
+}
+
 export function parseToolCalls(content: string): ParsedToolCall[] {
   const calls: ParsedToolCall[] = [];
 
