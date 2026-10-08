@@ -1,5 +1,5 @@
 {
-  "name": "@zhcode/agent-registry",
+  "name": "@zhcode/test",
   "version": "0.1.0",
   "description": "Declarative agent definitions and lookup for ZHcode",
   "type": "module",
