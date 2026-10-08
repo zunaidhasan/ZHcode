@@ -1,0 +1,11 @@
+{
+  "name": "@zhcode/agent-registry",
+  "version": "0.1.0",
+  "description": "Declarative agent definitions and lookup for ZHcode",
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "dependencies": {
+    "@zhcode/core": "workspace:*"
+  }
+}
