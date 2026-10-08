@@ -17,7 +17,14 @@ export { createAgentConfig, type AgentConfig } from "./config";
 export { AgentContext, type AgentContextOptions } from "./context";
 
 // Agent loop
-export { runAgentLoop, parseToolCalls, type ParsedToolCall } from "./loop";
+export {
+  runAgentLoop,
+  parseToolCalls,
+  collectToolCalls,
+  type ParsedToolCall,
+} from "./loop";
+
+export { extractJsonBlock } from "./json";
 
 // Agent class
 export { Agent, type AgentOptions } from "./agent";
@@ -40,3 +47,19 @@ export {
   type ExplorerAgentOptions,
   type ExplorerConfig,
 } from "./explorer";
+
+// Role agents
+export {
+  PlannerAgent,
+  CoderAgent,
+  TesterAgent,
+  ReviewerAgent,
+  DebuggerAgent,
+  isInvestigationResult,
+  isPlan,
+  isImplementationResult,
+  isTestResult,
+  isReviewResult,
+  isDiagnosis,
+  type RoleAgentOptions,
+} from "./roles";
