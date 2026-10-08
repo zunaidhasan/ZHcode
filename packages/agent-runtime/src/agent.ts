@@ -72,12 +72,12 @@ export class Agent {
       ? { ...this.defaultConfig, systemPrompt: request.systemPrompt }
       : this.defaultConfig;
 
-    // Merge event handlers: instance handler + request-specific handler.
+    // Merge instance, per-request, and cancellation handlers.
     const mergedHandler: AgentEventHandler | undefined =
-      this.onEvent || request.signal
+      this.onEvent || request.onEvent || request.signal
         ? (event) => {
             this.onEvent?.(event);
-            // If cancelled, abort the signal.
+            request.onEvent?.(event);
             if (event.type === "cancelled" && request.signal) {
               request.signal.throwIfAborted();
             }
